@@ -1,0 +1,645 @@
+from tkinter import *
+from tkinter import messagebox
+from tkinter import scrolledtext
+from tkinter import Canvas
+from tkinter import ttk
+from functools import partial
+
+
+
+
+root = Tk()
+root.geometry("500x500")
+root.configure(bg="light steel blue")
+root.title("memory managment")
+# Variable
+count = 0 
+holesInfo = [[]] 
+holesInfo = []
+processInfo =[]
+processEntry = ""
+processColumn = ""
+memoryWindow = ""
+segments = [[]]
+segments = []
+method = ""
+memoryArray = [[]]
+memoryArray =[]
+methodBox =""
+memorySize = 0
+segInfo =[[]]
+segInfo =[]
+scale = ""
+
+
+# MEmory and holes info 
+
+
+memoryLabel = Label(root , text=" Total  memory size")
+memoryLabel.place(y= 80 + 30, x=70 + 5)
+
+
+entry = Entry(root)
+entry.place(y= 80 + 30, x=70 + 125)
+
+holesLabel = Label(root , text=" Holes")
+holesLabel.place(y= 80 + 80, x=70 + 5)
+
+hSizeLabel= Label(root , text=" Start ")
+hSizeLabel.place(y= 80 + 60, x=70 + 70)
+
+hStartLabel= Label(root , text=" Size")
+hStartLabel.place(y= 80 + 60, x=70 + 175)
+
+holeStartEntry = Entry(root)
+holeStartEntry.place(y= 80 + 80, x=70 + 50 , width=100)
+
+holeSizeEntry= Entry(root)
+holeSizeEntry.place(y= 80 + 80, x=70 + 155 , width=100)
+
+column1 = scrolledtext.ScrolledText(root)
+column1.place(y = 200 , x = 170 , width=50 , height= 200)
+
+column2 = scrolledtext.ScrolledText(root)
+column2.place(y = 200 , x = 275 , width=50 , height= 200)
+
+
+def addHole() :
+	if holeStartEntry.get() == "" or holeSizeEntry.get() =="" :
+		messagebox.showinfo('error' , 'no hole to be added')
+	else :
+		column1.insert(INSERT, holeStartEntry.get() + "\n")
+		column2.insert(INSERT, holeSizeEntry.get() + "\n")
+		global holesInfo
+	
+		holesInfo.append([holeStartEntry.get(),holeSizeEntry.get() ])
+		global count 
+		count +=1
+
+# draw the first shape of memory 
+def addProcess() :
+	# check if added befor
+
+	processflag = 0 
+	global processInfo
+	global processColumn
+	if(processEntry.get() == "") :
+		messagebox.showinfo('error' , 'you must Enter the name of process')
+	else :
+		for row in processInfo :
+			if row == processEntry.get() :
+				processflag = 1
+		if(processflag) :
+			messagebox.showinfo('error' , 'You have an process with name ' + processEntry.get())
+		else :
+			processColumn.config(state="normal")
+			processInfo.append(processEntry.get())
+			processColumn.insert(INSERT, processEntry.get() + "\n")
+			processColumn.config(state="disabled")
+
+
+def thirdStep ():
+
+	global memoryWindow
+	memoryWindow.destroy()
+	thirdWindow = Toplevel(root)
+	thirdWindow.geometry("500x500")
+	global processInfo
+	global methodBox
+	global segments
+	processLabel = Label(thirdWindow , text="process")
+	processLabel.place(y=110, x=20)
+    
+	processBox = ttk.Combobox(thirdWindow, value=processInfo)
+	processBox.place(y= 110, x=75 , width =130)
+
+	segNumEntry = Entry(thirdWindow)
+	segNumEntry.place(y= 110, x=210 , width =40)
+
+	segSizeColumn = scrolledtext.ScrolledText(thirdWindow)
+	segSizeColumn.place(y = 50 , x = 265 , width=50, height= 200)
+
+	def showTable ():
+		global processInfo
+		global segInfo
+		global memoryArray
+
+		def getIndex(Array , search):
+			index = 0
+			for row in Array :
+				if search != row :
+					index +=1 
+				else :
+					break
+			return index
+		tableSegements = []
+		process = processBox.get()
+		index = getIndex(processInfo ,process )
+		for row in segments :
+			if row[0] == index :
+				tableSegements.append(row[1])
+		yLocation = 40
+		tableWindow = Toplevel(root)
+		height = len(memoryArray) *40
+		size = "80x" + str(height)
+		tableWindow.geometry(size)
+		ID = Entry(tableWindow)
+		ID.insert(END , 'P' )
+		ID.place(y= 0, x=10 , width =40 , height =40)
+
+		segBase = Entry(tableWindow)
+		segBase.insert(END ,'strt')
+		segBase.place(y= 0, x=40 , width =40 , height =40)
+
+		segSize = Entry(tableWindow)
+		segSize.insert(END ,'size')
+		segSize.place(y= 0, x=80 , width =40 , height =40)
+
+		for row in memoryArray :
+			if row[0] != "x" :
+
+				ID = Entry(tableWindow)
+				ID.insert(END , processInfo[int(row[0])] )
+				ID.place(y= yLocation, x=10 , width =40 , height =40)
+
+				segBase = Entry(tableWindow)
+				segBase.insert(END , row[1])
+				segBase.place(y= yLocation, x=40 , width =40 , height =40)
+
+				segSize = Entry(tableWindow)
+				segSize.insert(END , row[2])
+				segSize.place(y= yLocation, x=80 , width =40 , height =40)
+			
+				segSize = Entry(tableWindow)
+				segSize.insert(END , row[3])
+				segSize.place(y= yLocation, x=120 , width =40 , height =40)
+			
+
+				yLocation += 40 
+
+			
+			
+	
+	def allocate():
+		
+
+		def getIndex(Array , search):
+			index = 0
+			for row in Array :
+				if search != row :
+					index +=1 
+				else :
+					break
+			return index
+		global methodBox
+
+
+		def deallocate (index) :
+			# global holesInfo
+			# global memoryArray
+			# global processInfo
+			# print(pID)
+			# mID = 'x'
+			# 	# ID of process
+			# # pID = int(segments[int(index)][0])
+			# 	# get index in memoryArray
+			# for x in range(len(memoryArray)) :
+			# 	if (memoryArray[x][0]== pID) :
+			# 		mID = x
+			# print(mID)
+			# if( mID == 'x') :
+			# 		# deallocated
+			# 	messagebox.showinfo('warning' , 'deallocated')
+			# 	print(processInfo[pID])
+			# else :
+			# 	holesInfo.append([memoryArray[int(mID)][1],memoryArray[int(mID)][2]])
+			# 	memoryArray[int(mID)][0] ='x'
+			# 	print(memoryArray)
+			# 	print(processInfo[pID])
+			# 	print(holesInfo)
+			# 	# del processInfo[pID]
+			memoryArray[index][0] = 'x'
+			holesInfo.append([memoryArray[index][1],memoryArray[index][2]])
+			messagebox.showinfo('warning' , 'deallocated')
+			showMemory()
+			
+			
+				 
+				
+		def showMemory () : 
+			global memorySize
+			global scale
+			print (scale.get())
+			# deacllocate Process
+			
+			def deallocatProcess(process):
+				index = getIndex(processInfo , process)
+				for row in memoryArray :
+					if index == row[0] :
+						row[0] = 'x'
+						holesInfo.append([row[1],row[2]])
+				messagebox.showinfo('warning' , 'deallocated')
+				showMemory()
+
+
+
+			showTableBtt = Button(thirdWindow , text="ShowTab"  ,  bg="sandy brown" , command = showTable )
+			showTableBtt.place(y= 110 ,  x=360 , width= 50)
+			global segInfo
+			showWindow = Toplevel(root)
+			showWindow.geometry("500x500")
+			height = int(memorySize) * float(scale.get())
+
+			c = Canvas(showWindow , width=500, height=height)
+			c.pack()
+			c.create_rectangle(0,0, 150, height, fill='antique white' , outline = 'white')
+			index = 0 
+			# process List
+			column2 = Listbox(showWindow)
+			column2.place(y = 50 , x = 200 , width=150 , height= 50)
+			index = 0
+			for process in processInfo :
+				# check in array
+				for row in memoryArray:
+					if index == row[0]:
+						column2.insert(END , process)
+						break
+				index+=1
+
+			openButton = Button(showWindow , text = 'Delaocate' , command = lambda:deallocatProcess(column2.get(column2.curselection())))
+			openButton.place(x = 250 , height =30 , y = 100  , width=100)
+			memoryIndex = 0
+
+			for row in  memoryArray:
+				ID = row[0] 
+				start = int(row[1])*float(scale.get())
+				size =  int(row[2])*float(scale.get())
+				if(ID != 'x') :
+					# array
+					# startLocation = int(start)
+					# for index in range(len(segments)) :
+					# 	if segments[index][0] == ID :
+					# 		text = processInfo[ID] + "- segment" + str(index)
+					# 		segButton = Button(showWindow , text= text ,  bg="antique white" ,command = partial(deallocate, ID))
+					# 		print(ID)
+					# 		segButton.place(y=startLocation ,  x=0 , width= 150 , height=str(segments[index][1]))
+					# 		startLocation += int(segments[index][1])
+					# 		pp= segments[int(index)][0]
+					# 		print(processInfo[int(pp)])
+					# 					# process                  #base		#size
+					# 		segInfo.append([processInfo[ID] , startLocation , segments[index][1] ])
+					text = processInfo[ID] +"seg" + str (row[3])
+					segButton = Button(showWindow , text= text ,  bg="antique white" ,command = partial(deallocate, memoryIndex))
+					segButton.place(y=start ,  x=0 , width= 150 , height=size)
+
+
+
+					
+				else :
+					print(ID)
+					holeButton = Button(showWindow , text= "" ,  bg="floral white" )
+					holeButton.place(y=start ,  x=0 , width= 150 , height=size)
+				
+				# print(str(start) + "+ " + str(end))
+				memoryIndex+=1
+				index += 1
+		
+
+		def getSize(index) :
+			size = 0
+			for segment in segments :
+				if segment[0] == index :
+					size += int(segment[1])
+			# return size
+			return size
+		
+
+		def firstFit():
+
+			global memoryArray
+			global holesInfo
+			processIndex =  getIndex(processInfo , processBox.get())
+			size = getSize(processIndex)
+			print(size)
+			check = 0
+			# sort holess 
+			print(holesInfo)
+			holesInfo.sort(key=lambda holesInfo: int(holesInfo[0]))
+			# combination 
+			for x in range(len(holesInfo)-1) :
+				end = int(holesInfo[x][0]) + int(holesInfo[x][1])
+				start =int(holesInfo[x+1][0])
+				print(end)
+				print(end)
+				if end == start :
+					holesInfo[x][1] = int(holesInfo[x][1]) + int(holesInfo[x+1][1])
+					del holesInfo[x+1]
+
+			print(holesInfo)
+
+			# get index of first Hole
+			holeIndex = 'x'
+			fakeHoleIno = [[]] 
+			fakeHoleIno = holesInfo.copy() 
+			fakeMemoryArray = [[]] 
+			fakeMemoryArray = memoryArray.copy() 
+			checkCount = 0
+			segCount = 0 
+			# for hole in fakeHoleIno :
+				# print(hole)
+
+			count = 0 
+			for seg in segments :
+				if seg[0] == processIndex :
+					segCount +=1 
+					for x in range(len(fakeHoleIno)) :
+						if seg[1] <= int (fakeHoleIno[x][1]) :
+							checkCount +=1 
+						# first hole fit
+						# holeIndex = str(x)
+							segSize = int(seg[1])
+							count +=1
+							fakeMemoryArray.append([processIndex , fakeHoleIno[x][0] ,  seg[1] , count])
+							# start , #size 
+							holeSize = int(fakeHoleIno[x][1]) - segSize 
+							fakeHoleIno[x][0] = int(fakeHoleIno[x][0]) + segSize
+							fakeHoleIno[x][1] = holeSize
+							if holeSize ==0 :
+								del fakeHoleIno[x]
+							break
+						# else :
+						# 	# no hole fit
+						# 	check = 1
+						# break
+                
+				
+				# if check == 1 :
+				# 	break
+			   
+			# for hole in fakeMemoryArray :
+			# 	print(hole)
+			# print('ii')
+			# for hole in holesInfo :
+			# 	print(hole)
+			if checkCount != segCount :
+				check == 1
+				messagebox.showinfo('Allocation error' , 'No hole fit')
+
+
+
+			
+			else :
+				memoryArray = fakeMemoryArray.copy() 
+				holesInfo = fakeHoleIno.copy() 
+				# push holes to memoryArray
+				for row in holesInfo :
+					memoryArray.append(['x', row[0] , row[1]])
+				messagebox.showinfo('' , 'allocated')
+
+				
+
+			# 	# append               ID               start                                 segSize
+			# 	memoryArray.append([processIndex , holesInfo[int(holeIndex)][0] , holesInfo[int(holeIndex)][1]])
+			# 	# remove hole
+			# 	del holesInfo[int(holeIndex)]
+			# 	# push holes
+			# 	for row in holesInfo :
+			# 		memoryArray.append(['x', row[0] , row[1]])
+
+			# for row in memoryArray :
+			# 	print (row)
+			# var = DoubleVar()
+
+			showMemoryBtt = Button(thirdWindow , text="Show memory"  ,  bg="goldenrod1" ,command = showMemory)
+			showMemoryBtt.place(y= 470 ,  x=0 , width= 500 , height = 30 )
+
+
+		def bestFit():
+			global memoryArray
+			global holesInfo
+			processIndex =  getIndex(processInfo , processBox.get())
+			size = getSize(processIndex)
+			print(size)
+			check = 0
+			# sort holess 
+			holesInfo.sort(key=lambda holesInfo: int(holesInfo[0]))
+			# combination 
+			for x in range(len(holesInfo)-1) :
+				end = int(holesInfo[x][0]) + int(holesInfo[x][1])
+				start =int(holesInfo[x+1][0])
+				print(end)
+				print(end)
+				if end == start :
+					holesInfo[x][1] = int(holesInfo[x][1]) + int(holesInfo[x+1][1])
+					del holesInfo[x+1]
+
+
+			# get index of first Hole
+			holeIndex = 'x'
+			fakeHoleIno = [[]] 
+			fakeHoleIno = holesInfo.copy() 
+			fakeMemoryArray = [[]] 
+			fakeMemoryArray = memoryArray.copy() 
+			checkCount = 0
+			segCount = 0 
+			# for hole in fakeHoleIno :
+				# print(hole)
+
+			count = 0
+			for seg in segments :
+				if seg[0] == processIndex :
+					segCount +=1 
+
+					for x in range(len(fakeHoleIno)) :
+						if seg[1] <= int (fakeHoleIno[x][1]) :
+							checkCount +=1 
+
+						# first hole fit
+							holeIndex = x
+							for y in range(holeIndex +1 , len(fakeHoleIno)) :
+								if seg[1] <= int (fakeHoleIno[y][1]) :
+									if int (fakeHoleIno[y][1]) < int(fakeHoleIno[holeIndex][1]) :
+										print(y)
+										holeIndex = y
+							segSize = int(seg[1])
+							count+=1
+							fakeMemoryArray.append([processIndex , fakeHoleIno[holeIndex][0] ,  seg[1] , count])
+							# start , #size 
+							holeSize = int(fakeHoleIno[holeIndex][1]) - segSize 
+							fakeHoleIno[holeIndex][0] = int(fakeHoleIno[holeIndex][0]) + segSize
+							fakeHoleIno[holeIndex][1] = holeSize
+							if holeSize ==0 :
+								del fakeHoleIno[holeIndex]
+							break
+						# else :
+						# 	# no hole fit
+						# 	check = 1
+						# break
+
+				# if check == 1 :
+				# 	break
+			   
+			# for hole in fakeMemoryArray :
+			# 	print(hole)
+			# print('ii')
+			# for hole in holesInfo :
+			# 	print(hole)
+			if checkCount != segCount :
+				check == 1
+				messagebox.showinfo('Allocation error' , 'No hole fit')
+
+
+
+			
+			else :
+				memoryArray = fakeMemoryArray.copy() 
+				holesInfo = fakeHoleIno.copy() 
+				# push holes to memoryArray
+				for row in holesInfo :
+					memoryArray.append(['x', row[0] , row[1] , 'x'])
+				messagebox.showinfo('' , 'allocated')
+
+				
+
+			# 	# append               ID               start                                 segSize
+			# 	memoryArray.append([processIndex , holesInfo[int(holeIndex)][0] , holesInfo[int(holeIndex)][1]])
+			# 	# remove hole
+			# 	del holesInfo[int(holeIndex)]
+			# 	# push holes
+			# 	for row in holesInfo :
+			# 		memoryArray.append(['x', row[0] , row[1]])
+
+			# for row in memoryArray :
+			# 	print (row)
+			
+			showMemoryBtt = Button(thirdWindow , text="Show memory"  ,  bg="goldenrod1" ,command =showMemory)
+			showMemoryBtt.place(y= 470 ,  x=0 , width= 500 , height = 30 )
+
+
+		if methodBox.get() == 'First Fit':
+			firstFit()
+		else :
+			bestFit()
+	
+
+	
+	def method () :
+		global methodBox
+		global scale
+		methods = ['First Fit' , 'Best Fit']
+		methodLabel = Label(thirdWindow , text="method")
+		methodLabel.place(y=270, x=50)
+		methodBox = ttk.Combobox(thirdWindow, value=methods)
+		methodBox.place(y=270, x=120 , width =250)
+		methodBtt.place_forget() 
+		scale = Scale( thirdWindow, from_=0, to=4 , resolution=0.1 )
+		scale.place(y= 300,  x=0 , width= 500 , height = 70 )
+		allocateBtt = Button(thirdWindow , text="Allocate"  ,  bg="sandy brown" , command = allocate )
+		allocateBtt.place(y= 270 ,  x=390 , width= 50 )
+		
+	def addSeg () :
+		# get index 
+		index = 0
+		flag = 0
+		global segments
+		global memoryArray
+		for row in processInfo :
+			if processBox.get() != row  :
+				index +=1
+			else : 
+				break
+		# check if allocated 
+		for row in segments :
+			if row[0] == index :
+				flag = 1
+		if(flag) :
+			messagebox.showinfo('error' , 'you have added segemnt to ' + processInfo[index])
+		else :
+			subSegments = segSizeColumn.get("1.0", END)
+			subSegments = subSegments.split('\t')
+			print (subSegments)
+
+			for x in subSegments:
+				print(x)
+
+			for x in range(int(segNumEntry.get())):
+				segments.append([index,int(subSegments[x])])
+
+			messagebox.showinfo('segments' , 'process' +'(' + processInfo[index] +')' + "Is added" )
+
+
+		
+
+
+	addSBtt = Button(thirdWindow , text="ADD" ,  bg="antique white" , command=addSeg)
+	addSBtt.place(y= 110 ,  x=310 , width= 50)
+
+	methodBtt = Button(thirdWindow , text="method" ,  bg="orange" , command = method)
+	methodBtt.place(y= 110 ,  x=360 , width= 50)
+def secondStep():
+	if entry.get() == "" :
+		messagebox.showinfo('Error' ,'You must enter memory Size' ) 
+	else :
+		secondWindow()
+
+
+def secondWindow() : 
+	global count 
+	global holesInfo
+	global memoryWindow
+	global memorySize
+	# start = 0 
+	# size = 0
+	holeCount =0
+	memoryWindow = Toplevel(root)
+	height = entry.get();
+	memorySize = int(height)
+
+	size = "500x" + height
+	memoryWindow.geometry(size)
+	c = Canvas(memoryWindow , width=500, height=height)
+	c.pack()
+	c.create_rectangle(350,0, 500, height, fill='antique white' , outline = 'antique white')
+	# indeication for holes and occupied
+	c.create_rectangle(0,0, 25, 20, fill='antique white' , outline = 'antique white')
+	holeIndeicationLabel = Label(memoryWindow , text = "Occupied")
+	holeIndeicationLabel.place(x= 30 , y=0)
+	c.create_rectangle(100,0, 125, 20, fill='floral white' , outline = 'floral white')
+	holeIndeicationLabel = Label(memoryWindow , text = "Hole")
+	holeIndeicationLabel.place(x= 130 , y=0)
+
+	# draw memoty
+	for row in  holesInfo:
+		holeCount +=1
+		start = row[0] 
+		size = row[1]
+		holeButton = Button(memoryWindow , text= "" ,  bg="floral white" )
+		holeButton.place(y=start ,  x=350, width= 150 , height=size)
+
+	processLabel = Label(memoryWindow , text="Process")
+	processLabel.place(y= 110, x=5)
+
+	global processEntry
+	processEntry = Entry(memoryWindow)
+	processEntry.place(y= 110, x=55 , width =100)
+
+	nextPBtt = Button(memoryWindow , text="ADD" ,  bg="antique white" , command = addProcess )
+	nextPBtt.place(y= 110 ,  x=160 , width= 50)
+
+	endPBtt = Button(memoryWindow , text="Next"  ,  bg="sandy brown" , command = thirdStep )
+	endPBtt.place(y= 110 ,  x=210 , width= 50 )
+	global processColumn
+	processColumn = scrolledtext.ScrolledText(memoryWindow)
+	processColumn.place(y = 150 , x = 80 , width=100, height= 200)
+	processColumn.config(state=DISABLED)
+
+	
+nextHoleBtt = Button(root , text="ADD" ,  bg="antique white" , command = addHole )
+nextHoleBtt.place(y= 80 + 80 ,  x=70 + 260 , width= 50)
+
+endHoleBtt = Button(root , text="Next"  ,  bg="sandy brown" , command = secondStep )
+endHoleBtt.place(y= 80 + 80 ,  x=70 + 310 , width= 50 )
+
+
+
+root.mainloop()
